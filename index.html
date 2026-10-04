@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ru" class="h-full">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>project-map-p1</title>
+  <!-- ПОДКЛЮЧАЕМ: Шрифтовые иконки Google для поиска и погоды -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+</head>
+
+<!-- Body — это флекс-контейнер на всю высоту экрана без скролла -->
+
+<body class="flex h-full m-0 font-noto text-[#1a1a1a] overflow-hidden">
+
+  <!-- СЛАЙДБАР (Ширина строго 390px по вашему :root, отступы 15px/30px) -->
+<aside
+  class="sidebar flex flex-col w-[390px] min-w-[390px] h-screen bg-white py-[15px] px-[30px] box-border shrink-0 relative transition-transform duration-300 ease-in-out"
+  aria-label="Боковая панель карты">
+
+
+    <!-- Блок поиска -->
+    <div class="relative w-full flex items-center">
+      <!-- Проверьте id="map-search" -->
+      <input type="text" id="map-search" name="map-search"
+        class="sidebar__search-input w-full h-[38px] pl-[24px] pr-[44px] border-none rounded-full bg-[#eeeeee] font-noto text-[16px] text-[#1a1a1a] placeholder:text-[#6b6b6b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#1a1a1a] focus-visible:outline-offset-2"
+        placeholder="Поиск" autocomplete="off" />
+
+      <!-- Блок подсказок поиска -->
+      <div id="search-suggestions"
+        class="hidden absolute top-full left-0 w-full mt-[8px] bg-white rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.15)] overflow-hidden z-[1000]">
+      </div>
+
+      <!-- close btn -->
+      <button type="button" id="search-clear-btn"
+        class="absolute right-[14px] flex items-center justify-center w-[24px] h-[24px] text-[#6b6b6b] hover:text-[#1a1a1a] cursor-pointer hidden transition-colors duration-200"
+        aria-label="Очистить поиск">
+        <svg class="w-[20px] h-[20px] block" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"
+          aria-hidden="true">
+          <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+        </svg>
+      </button>
+    </div>
+    <!-- строка ошибки если объект не найден: -->
+    <div id="search-error" class="w-full"></div>
+
+    <!-- Виджет погоды -->
+    <div id="weather-widget"
+      class="flex items-center gap-[6px] mt-[12px] px-[4px] font-noto transition-opacity duration-300 opacity-0">
+      <!-- Убрали font-bold, сделали шрифт обычным (font-normal), размер 15px -->
+      <span class="text-[17px] font-normal text-[#1a1a1a] leading-none" id="weather-city">Москва</span>
+      <!-- Контейнер для иконки: центрируем SVG внутри себя -->
+      <div id="weather-icon" class="w-[24px] h-[24px] flex items-center justify-center shrink-0"></div>
+      <!-- Уменьшили температуру до 15px, сделали шрифт обычным (font-normal) -->
+      <span class="text-[15px] font-normal text-[#1a1a1a] leading-none" id="weather-temp">--°C</span>
+    </div>
+
+    <!-- ─── ДОБАВЛЯЕМ СЮДА КОНТЕЙНЕР ДЛЯ РЕЗУЛЬТАТОВ ─── -->
+    <div id="search-results" class="flex-1 w-full overflow-y-auto"></div>
+
+    <!-- Навигация / Слои (займет всё свободное место и будет скроллиться) -->
+    <nav class="sidebar__nav flex-1 mt-[24px] overflow-y-auto" aria-label="Слои и результаты поиска">
+      <!-- сюда рендерится список слоёв / результатов -->
+    </nav>
+
+    <!-- Футер сайдбара -->
+    <footer class="sidebar__footer border-t border-[#d9d9d9] pt-[24px] mt-[24px]">
+      <p class="sidebar__brand flex items-baseline gap-[8px] mt-[15px]">
+        <span class="sidebar__brand-by font-serif text-[15px] lowercase">by</span>
+        <span
+          class="sidebar__brand-name font-bitcount tracking-[0.5px] text-[25px] font-medium text-[#1a1a1a]">Colonia</span>
+      </p>
+
+      <p class="sidebar__meta m-0 mb-[24px] text-[10px] leading-[1.6] text-[#6b6b6b]">
+        © 2026 map-project<br />
+        Микросервис карт<br />
+        Разработано в учебных целях
+      </p>
+
+      <div class="relative inline-block group mb-[24px]">
+
+        <a href="https://github.com/ZakharovVlr/New-Map" target="_blank" rel="noopener noreferrer"
+          aria-label="Открыть репозиторий на GitHub"
+          class="sidebar__github inline-flex items-center text-[#6b6b6b] transition-colors duration-200 hover:text-[#1a1a1a]">
+          <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38
+              0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+              -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07
+              -1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82
+              .64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12
+              .51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48
+              0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z" />
+          </svg>
+        </a>
+
+        <span role="tooltip" class="pointer-events-none absolute left-0 bottom-full mb-[8px] whitespace-nowrap
+               px-[10px] py-[4px] rounded-[6px] border border-[#d9d9d9] bg-white
+               font-serif text-[12px] text-[#1a1a1a]
+               opacity-0 -translate-y-[2px] transition-all duration-150
+               group-hover:opacity-100 group-hover:translate-y-0">
+          Открыть репозиторий
+        </span>
+      </div>
+
+      <button type="button"
+        class="sidebar__lang block w-[90px] h-[40px] px-[20px] mt-[32px] border border-[#d9d9d9] rounded-full bg-white font-serif text-[15px] text-[#1a1a1a] cursor-pointer transition-colors duration-200 hover:bg-[#eeeeee] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#1a1a1a] focus-visible:outline-offset-2"
+        aria-haspopup="listbox" aria-label="Выбор языка интерфейса, текущий язык: русский">
+        RU
+      </button>
+    </footer>
+
+  <!-- Кнопка-ярлычок для сворачивания сайдбара -->
+  <button type="button" id="sidebar-toggle-btn"
+    class="absolute top-[24px] left-full flex items-center justify-center w-[24px] h-[48px] bg-[#5cb7ff] border-0 rounded-r-[12px] shadow-[4px_4px_12px_rgba(0,0,0,0.15)] cursor-pointer p-0 text-white transition-colors duration-200 hover:bg-[#40a0ff] z-[1001]"
+    aria-expanded="true" aria-controls="sidebar" aria-label="Свернуть боковую панель">
+  
+    <svg class="sidebar-toggle-icon w-[20px] h-[20px] fill-current block transition-transform duration-300 ease-in-out"
+      viewBox="0 -960 960 960" aria-hidden="true">
+      <path
+        d="M440-240 200-480l240-240 56 56-183 184 183 184-56 56Zm264 0L464-480l240-240 56 56-183 184 183 184-56 56Z" />
+    </svg>
+  </button>
+
+
+  </aside>
+
+  <!-- КОНТЕЙНЕР КАРТЫ -->
+  <main id="map" class="map relative flex-1 h-screen bg-[#b7b7b7]" aria-label="Карта района">
+
+    <!-- Сюда скрипт canvas.js добавит ваш <canvas> -->
+
+    <!-- БЛОК КНОПОК -->
+    <div
+      class="map-controls absolute top-1/2 right-[20px] -translate-y-1/2 z-[1000] flex flex-col gap-[12px] pointer-events-auto">
+
+      <!-- Группа Zoom (+ / -) с закруглением 20px и тенью из вашего CSS -->
+      <div
+        class="map-controls__group flex flex-col bg-white rounded-[20px] shadow-[0_4px_12px_rgba(0,0,0,0.15)] overflow-hidden">
+
+        <!-- Кнопка Плюс -->
+        <button type="button"
+          class="map-btn map-btn--zoom-in flex items-center justify-center w-[48px] h-[48px] bg-white border-0 border-b border-[#f0f0f0] cursor-pointer p-0 text-[#333333] transition-colors duration-200 hover:bg-[#f5f5f5]"
+          aria-label="Приблизить">
+          <svg class="w-[24px] h-[24px] fill-current block" height="24px" viewBox="0 -960 960 960" width="24px"
+            aria-hidden="true">
+            <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
+          </svg>
+        </button>
+
+        <!-- Кнопка Минус -->
+        <button type="button"
+          class="map-btn map-btn--zoom-out flex items-center justify-center w-[48px] h-[48px] bg-white border-0 cursor-pointer p-0 text-[#333333] transition-colors duration-200 hover:bg-[#f5f5f5]"
+          aria-label="Отдалить">
+          <svg class="w-[24px] h-[24px] fill-current block" height="24px" viewBox="0 -960 960 960" width="24px"
+            aria-hidden="true">
+            <path d="M200-440v-80h560v80H200Z" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Отдельная круглая кнопка геолокации -->
+      <button type="button"
+        class="map-btn map-btn--location flex items-center justify-center w-[48px] h-[48px] bg-white border-0 rounded-[25px] shadow-[0_4px_12px_rgba(0,0,0,0.15)] cursor-pointer p-0 text-[#333333] transition-colors duration-200 hover:bg-[#f5f5f5]"
+        aria-label="Мое местоположение">
+        <svg class="w-[24px] h-[24px] fill-current block" height="24px" viewBox="0 -960 960 960" width="24px"
+          aria-hidden="true">
+          <path d="M516-120 402-402 120-516v-56l720-268-268 720h-56Zm26-148 162-436-436 162 196 78 78 196Zm-78-196Z" />
+        </svg>
+      </button>
+    </div>
+  </main>
+
+  <!-- ШАБЛОН ЧИСТОЙ КАРТОЧКИ ОБЪЕКТА -->
+  <template id="object-card-template">
+    <article class="object-card mt-[24px] px-[4px] font-noto">
+
+      <!-- 1. Название/Заголовок (например: Сухановская улица, 30) -->
+      <h2 class="card-title text-[20px] font-bold text-[#1a1a1a] leading-tight mb-[4px]">Название</h2>
+
+      <!-- 2. Полное описание/Адрес (серый текст, размер 15px) -->
+      <p class="card-subtitle text-[13px] font-normal text-[#7f7f7f] leading-normal mb-[12px]">Описание объекта</p>
+
+      <!-- 3. Координаты с кнопкой копирования на конце -->
+      <div class="text-[13px] font-normal text-[#7f7f7f] flex items-center gap-[4px]">
+        <span>Координаты:</span>
+        <span class="card-coords font-sans text-[#1a1a1a] select-all">00.000000, 00.000000</span>
+        <!-- Кнопка копирования координат -->
+        <button type="button"
+          class="card-copy-btn text-[#1a1a1a] font-bold tracking-[1px] ml-[2px] cursor-pointer hover:opacity-80 bg-transparent border-0 p-0"
+          aria-label="Скопировать координаты">...</button>
+      </div>
+
+    </article>
+  </template>
+
+  <!-- Шаблон маленькой карточки-подсказки инпута  -->
+  <template id="suggestion-template">
+    <button type="button"
+      class="suggestion-item block w-full text-left px-[16px] py-[10px] hover:bg-[#f5f5f5] cursor-pointer">
+      <span class="suggestion-title block text-[15px] font-medium text-[#1a1a1a]"></span>
+      <span class="suggestion-subtitle block text-[12px] text-[#7f7f7f]"></span>
+    </button>
+  </template>
+
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

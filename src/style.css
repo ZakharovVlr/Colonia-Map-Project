@@ -1,0 +1,25 @@
+/* 1. Базовые стили Tailwind v4 */
+@import "tailwindcss";
+
+/* 2. Подключение вашего файла шрифтов */
+@import "../fonts/fonts.css";
+
+/* 3. Регистрируем уникальные имена для классов шрифтов */
+@theme {
+  --font-noto: "Noto Serif", serif;
+  --font-bitcount: "Bitcount Single", monospace;
+}
+
+/* Намертво стираем любые встроенные крестики очистки у ВСЕХ инпутов на странице */
+input::-webkit-search-decoration,
+input::-webkit-search-cancel-button,
+input::-webkit-search-results-button,
+input::-webkit-search-results-decoration {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+}
