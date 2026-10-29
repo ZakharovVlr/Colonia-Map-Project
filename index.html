@@ -16,20 +16,30 @@
 
 <!-- Body — это флекс-контейнер на всю высоту экрана без скролла -->
 
-<body class="flex h-full m-0 font-noto text-[#1a1a1a] overflow-hidden">
+<body class="h-full m-0 font-noto text-[#1a1a1a] overflow-hidden relative">
 
   <!-- СЛАЙДБАР (Ширина строго 390px по вашему :root, отступы 15px/30px) -->
-<aside
-  class="sidebar flex flex-col w-[390px] min-w-[390px] h-screen bg-white py-[15px] px-[30px] box-border shrink-0 relative transition-transform duration-300 ease-in-out"
-  aria-label="Боковая панель карты">
+<aside id="sidebar" class="sidebar flex flex-col box-border fixed z-[1001] transition-transform duration-300 ease-in-out
+         /* Десктоп */
+         w-[390px] h-screen top-0 left-0 py-[15px] px-[30px] bg-white
+         /* Мобильный: фиксированная высота, скругление, убираем вниз */
+         max-md:w-full max-md:h-[70vh] max-md:top-auto max-md:bottom-0 max-md:left-0 max-md:right-0
+         max-md:rounded-t-[20px] max-md:px-[20px] max-md:py-[10px] max-md:overflow-hidden
+         /* По умолчанию прячем основное тело шторки за нижний край */"
+          aria-label="Боковая панель карты">
 
+
+  <!-- Маленькая горизонтальная полосочка (хендл) для шторки, видна только на мобилках -->
+  <div
+    class="hidden max-md:block w-[40px] h-[4px] bg-[#d9d9d9] dark--theme:bg-[#444444] rounded-full mx-auto mb-[15px]">
+  </div>
 
     <!-- Блок поиска -->
-    <div class="relative w-full flex items-center">
+    <div class="relative w-full flex items-center shrink-0">
       <!-- Проверьте id="map-search" -->
       <input type="text" id="map-search" name="map-search"
         class="sidebar__search-input w-full h-[38px] pl-[24px] pr-[44px] border-none rounded-full bg-[#eeeeee] font-noto text-[16px] text-[#1a1a1a] placeholder:text-[#6b6b6b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#1a1a1a] focus-visible:outline-offset-2"
-        placeholder="Поиск" autocomplete="off" />
+        placeholder="Поиск" autocomplete="off" data-i18n-placeholder="search-placeholder" />
 
       <!-- Блок подсказок поиска -->
       <div id="search-suggestions"
@@ -49,6 +59,9 @@
     <!-- строка ошибки если объект не найден: -->
     <div id="search-error" class="w-full"></div>
 
+    <!-- ВСЁ ОСТАЛЬНОЕ содержимое (погоду, результаты, футер) оборачиваем в скролл-контейнер -->
+    <div class="flex-1 w-full overflow-y-auto mt-[12px] max-md:pb-[20px]">
+      <!-- Сюда переезжают #search-error, #weather-widget, #search-results, nav и footer -->
     <!-- Виджет погоды -->
     <div id="weather-widget"
       class="flex items-center gap-[6px] mt-[12px] px-[4px] font-noto transition-opacity duration-300 opacity-0">
@@ -78,13 +91,13 @@
 
       <p class="sidebar__meta m-0 mb-[24px] text-[10px] leading-[1.6] text-[#6b6b6b]">
         © 2026 map-project<br />
-        Микросервис карт<br />
-        Разработано в учебных целях
-      </p>
+        <span data-i18n="footer-microservice">Микросервис карт</span><br />
+        <span data-i18n="footer-purpose">Разработано в учебных целях</span>
+        </p>
 
       <div class="relative inline-block group mb-[24px]">
 
-        <a href="https://github.com/ZakharovVlr/New-Map" target="_blank" rel="noopener noreferrer"
+        <a href="https://github.com/ZakharovVlr/Colonia-Map-Project.git" target="_blank" rel="noopener noreferrer"
           aria-label="Открыть репозиторий на GitHub"
           class="sidebar__github inline-flex items-center text-[#6b6b6b] transition-colors duration-200 hover:text-[#1a1a1a]">
           <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
@@ -102,23 +115,38 @@
                px-[10px] py-[4px] rounded-[6px] border border-[#d9d9d9] bg-white
                font-serif text-[12px] text-[#1a1a1a]
                opacity-0 -translate-y-[2px] transition-all duration-150
-               group-hover:opacity-100 group-hover:translate-y-0">
+               group-hover:opacity-100 group-hover:translate-y-0" data-i18n="github-tooltip">
           Открыть репозиторий
         </span>
       </div>
 
-      <button type="button"
-        class="sidebar__lang block w-[90px] h-[40px] px-[20px] mt-[32px] border border-[#d9d9d9] rounded-full bg-white font-serif text-[15px] text-[#1a1a1a] cursor-pointer transition-colors duration-200 hover:bg-[#eeeeee] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#1a1a1a] focus-visible:outline-offset-2"
-        aria-haspopup="listbox" aria-label="Выбор языка интерфейса, текущий язык: русский">
-        RU
-      </button>
+      <div class="relative block group mb-[24px]">
+        <button type="button" id="lang-switch-btn"
+          class="sidebar__lang flex items-center justify-center gap-[8px] w-[90px] h-[40px] px-[16px] border border-[#d9d9d9] rounded-full bg-white font-serif text-[15px] text-[#1a1a1a] cursor-pointer transition-colors duration-200 hover:bg-[#eeeeee] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#1a1a1a] focus-visible:outline-offset-2"
+          aria-haspopup="listbox" 
+          aria-label="Выбор языка интерфейса, текущий язык: русский">
+          <svg class="w-[18px] h-[18px] fill-current shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960"
+            aria-hidden="true">
+            <path
+              d="M325-111.5q-73-31.5-127.5-86t-86-127.5Q80-398 80-480.5t31.5-155q31.5-72.5 86-127t127.5-86Q398-880 480.5-880t155 31.5q72.5 31.5 127 86t86 127Q880-563 880-480.5T848.5-325q-31.5 73-86 127.5t-127 86Q563-80 480.5-80T325-111.5ZM480-162q26-36 45-75t31-83H404q12 44 31 83t45 75Zm-104-16q-18-33-31.5-68.5T322-320H204q29 50 72.5 87t99.5 55Zm208 0q56-18 99.5-55t72.5-87H638q-9 38-22.5 73.5T584-178ZM170-400h136q-3-20-4.5-39.5T300-480q0-21 1.5-40.5T306-560H170q-5 20-7.5 39.5T160-480q0 21 2.5 40.5T170-400Zm216 0h188q3-20 4.5-39.5T580-480q0-21-1.5-40.5T574-560H386q-3 20-4.5 39.5T380-480q0 21 1.5 40.5T386-400Zm268 0h136q5-20 7.5-39.5T800-480q0-21-2.5-40.5T790-560H654q3 20 4.5 39.5T660-480q0 21-1.5 40.5T654-400Zm-16-240h118q-29-50-72.5-87T584-782q18 33 31.5 68.5T638-640Zm-234 0h152q-12-44-31-83t-45-75q-26 36-45 75t-31 83Zm-200 0h118q9-38 22.5-73.5T376-782q-56 18-99.5 55T204-640Z" />
+          </svg>
+          <span id="lang-switch-label">RU</span>
+        </button>
+      
+        <span role="tooltip" class="tooltip-text left-0 bottom-full mb-[8px] -translate-y-[2px] group-hover:translate-y-0"
+          data-i18n="lang-tooltip">
+          Поменять язык
+        </span>
+      </div>
     </footer>
+    </div>
 
   <!-- Кнопка-ярлычок для сворачивания сайдбара -->
-  <button type="button" id="sidebar-toggle-btn"
-    class="absolute top-[24px] left-full flex items-center justify-center w-[24px] h-[48px] bg-[#5cb7ff] border-0 rounded-r-[12px] shadow-[4px_4px_12px_rgba(0,0,0,0.15)] cursor-pointer p-0 text-white transition-colors duration-200 hover:bg-[#40a0ff] z-[1001]"
+<div class="tooltip-trigger absolute top-[24px] left-full group">
+  <button type="button" id="sidebar-toggle"
+    class="flex items-center justify-center w-[24px] h-[48px] bg-[#000000] border-0 rounded-r-[12px] shadow-[4px_4px_12px_rgba(0,0,0,0.15)] cursor-pointer p-0 text-white transition-colors duration-200 z-[1001]"
     aria-expanded="true" aria-controls="sidebar" aria-label="Свернуть боковую панель">
-  
+
     <svg class="sidebar-toggle-icon w-[20px] h-[20px] fill-current block transition-transform duration-300 ease-in-out"
       viewBox="0 -960 960 960" aria-hidden="true">
       <path
@@ -126,15 +154,108 @@
     </svg>
   </button>
 
-
+  <span role="tooltip" class="tooltip-text left-full top-1/2 ml-[8px] -translate-y-1/2"
+    data-i18n="sidebar-toggle-tooltip">
+    Свернуть панель
+  </span>
+</div>
   </aside>
 
   <!-- КОНТЕЙНЕР КАРТЫ -->
-  <main id="map" class="map relative flex-1 h-screen bg-[#b7b7b7]" aria-label="Карта района">
-
+  <main id="map" class="map absolute inset-0 w-full h-screen bg-[#b7b7b7] z-1" aria-label="Карта района">
+    
+    <div id="map-canvas" class="absolute inset-0 w-full h-full"></div>
     <!-- Сюда скрипт canvas.js добавит ваш <canvas> -->
 
     <!-- БЛОК КНОПОК -->
+    <div id="toolbar" class="absolute top-[24px] right-[24px] z-[1000] flex items-center gap-[12px]">
+    
+      <!-- Кнопка-меню: видна, когда панель свёрнута -->
+      <button type="button" id="toolbar-menu-btn"
+        class="hidden items-center justify-center w-[52px] h-[52px] bg-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] border-0 cursor-pointer p-0 text-[#1f1f1f]  transition-colors duration-200"
+        aria-label="Открыть панель действий" aria-expanded="false" aria-controls="toolbar-actions">
+        <svg class="w-[22px] h-[22px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+          <path
+            d="M183.5-183.5Q160-207 160-240t23.5-56.5Q207-320 240-320t56.5 23.5Q320-273 320-240t-23.5 56.5Q273-160 240-160t-56.5-23.5Zm240 0Q400-207 400-240t23.5-56.5Q447-320 480-320t56.5 23.5Q560-273 560-240t-23.5 56.5Q513-160 480-160t-56.5-23.5Zm240 0Q640-207 640-240t23.5-56.5Q687-320 720-320t56.5 23.5Q800-273 800-240t-23.5 56.5Q753-160 720-160t-56.5-23.5Zm-480-240Q160-447 160-480t23.5-56.5Q207-560 240-560t56.5 23.5Q320-513 320-480t-23.5 56.5Q273-400 240-400t-56.5-23.5Zm240 0Q400-447 400-480t23.5-56.5Q447-560 480-560t56.5 23.5Q560-513 560-480t-23.5 56.5Q513-400 480-400t-56.5-23.5Zm240 0Q640-447 640-480t23.5-56.5Q687-560 720-560t56.5 23.5Q800-513 800-480t-23.5 56.5Q753-400 720-400t-56.5-23.5Zm-480-240Q160-687 160-720t23.5-56.5Q207-800 240-800t56.5 23.5Q320-753 320-720t-23.5 56.5Q273-640 240-640t-56.5-23.5Zm240 0Q400-687 400-720t23.5-56.5Q447-800 480-800t56.5 23.5Q560-753 560-720t-23.5 56.5Q513-640 480-640t-56.5-23.5Zm240 0Q640-687 640-720t23.5-56.5Q687-800 720-800t56.5 23.5Q800-753 800-720t-23.5 56.5Q753-640 720-640t-56.5-23.5Z" />
+        </svg>
+      </button>
+    
+      <!-- Единая таблетка с 4 кнопками -->
+      <div id="toolbar-actions"
+        class="toolbar-pill flex items-center gap-[4px] bg-white rounded-full shadow-[0_4px_12px_rgba(0,0,0,0.15)] px-[10px] py-[8px] text-[#1f1f1f] transition-colors duration-200">
+    
+        <div class="tooltip-trigger relative inline-block group">
+          <button type="button" id="toolbar-print-btn"
+            class="flex items-center justify-center w-[36px] h-[36px] rounded-full border-0 bg-transparent cursor-pointer p-0 text-inherit hover:bg-black/5 transition-colors duration-200"
+            aria-label="Печать">
+            <svg class="w-[20px] h-[20px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <path
+                d="M640-640v-120H320v120h-80v-200h480v200h-80Zm-480 80h640-640Zm560 100q17 0 28.5-11.5T760-500q0-17-11.5-28.5T720-540q-17 0-28.5 11.5T680-500q0 17 11.5 28.5T720-460Zm-80 260v-160H320v160h320Zm80 80H240v-160H80v-240q0-51 35-85.5t85-34.5h560q51 0 85.5 34.5T880-520v240H720v160Zm80-240v-160q0-17-11.5-28.5T760-560H200q-17 0-28.5 11.5T160-520v160h80v-80h480v80h80Z" />
+            </svg>
+          </button>
+          <span role="tooltip" class="tooltip-text left-1/2 -translate-x-1/2 top-full mt-[8px]"
+            data-i18n="toolbar-print-tooltip">Печать</span>
+        </div>
+    
+        <div class="tooltip-trigger relative inline-block group">
+          <button type="button" id="toolbar-share-btn"
+            class="flex items-center justify-center w-[36px] h-[36px] rounded-full border-0 bg-transparent cursor-pointer p-0 text-inherit hover:bg-black/5 transition-colors duration-200"
+            aria-label="Поделиться">
+            <svg class="w-[20px] h-[20px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <path
+                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z" />
+            </svg>
+          </button>
+          <span role="tooltip" class="tooltip-text left-1/2 -translate-x-1/2 top-full mt-[8px]"
+            data-i18n="toolbar-share-tooltip">Поделиться</span>
+        </div>
+    
+        <div class="tooltip-trigger relative inline-block group">
+          <button type="button" id="toolbar-report-btn"
+            class="flex items-center justify-center w-[36px] h-[36px] rounded-full border-0 bg-transparent cursor-pointer p-0 text-inherit hover:bg-black/5 transition-colors duration-200"
+            aria-label="Сообщить об ошибке">
+            <svg class="w-[20px] h-[20px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+              <path
+                d="M508.5-291.5Q520-303 520-320t-11.5-28.5Q497-360 480-360t-28.5 11.5Q440-337 440-320t11.5 28.5Q463-280 480-280t28.5-11.5ZM440-440h80v-240h-80v240Zm40 360q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm0-80q134 0 227-93t93-227q0-134-93-227t-227-93q-134 0-227 93t-93 227q0 134 93 227t227 93Zm0-320Z" />
+            </svg>
+          </button>
+          <span role="tooltip" class="tooltip-text left-1/2 -translate-x-1/2 top-full mt-[8px]"
+            data-i18n="toolbar-report-tooltip">Сообщить об ошибке</span>
+        </div>
+    
+        <!-- Переключатель темы: 2 статичные иконки, видимость переключается классом -->
+        <div class="tooltip-trigger relative inline-block group">
+          <button type="button" id="toolbar-theme-btn"
+            class="flex items-center justify-center w-[60px] h-[36px] rounded-full border border-current/20 bg-transparent cursor-pointer p-0 text-inherit hover:bg-black/5 transition-colors duration-200"
+            aria-label="Переключить тему" aria-pressed="false">
+            <svg id="toolbar-theme-icon-sun" class="w-[20px] h-[20px]" xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 -960 960 960" fill="currentColor">
+              <path
+                d="M440-760v-160h80v160h-80Zm266 110-55-55 112-115 56 57-113 113Zm54 210v-80h160v80H760ZM440-40v-160h80v160h-80ZM254-652 140-763l57-56 113 113-56 54Zm508 512L651-255l54-54 114 110-57 59ZM40-440v-80h160v80H40Zm157 300-56-57 112-112 29 27 29 28-114 114Zm113-170q-70-70-70-170t70-170q70-70 170-70t170 70q70 70 70 170t-70 170q-70 70-170 70t-170-70Zm283-57q47-47 47-113t-47-113q-47-47-113-47t-113 47q-47 47-47 113t47 113q47 47 113 47t113-47ZM480-480Z" />
+            </svg>
+            <svg id="toolbar-theme-icon-moon" class="w-[20px] h-[20px] hidden" xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 -960 960 960" fill="currentColor">
+              <path
+                d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Zm0-80q88 0 158-48.5T740-375q-20 5-40 8t-40 3q-123 0-209.5-86.5T364-660q0-20 3-40t8-40q-78 32-126.5 102T200-480q0 116 82 198t198 82Zm-10-270Z" />
+            </svg>
+          </button>
+          <span role="tooltip" class="tooltip-text left-1/2 -translate-x-1/2 top-full mt-[8px]"
+            data-i18n="toolbar-theme-tooltip">Тема</span>
+        </div>
+    
+      </div>
+    
+      <!-- Отдельная круглая кнопка закрытия, с отступом от таблетки -->
+      <button type="button" id="toolbar-close-btn"
+        class="toolbar-pill flex items-center justify-center w-[52px] h-[52px] rounded-full bg-white shadow-[0_4px_12px_rgba(0,0,0,0.15)] border-0 cursor-pointer p-0 text-[#1f1f1f] transition-colors duration-200"
+        aria-label="Закрыть панель действий" aria-expanded="true" aria-controls="toolbar-actions">
+        <svg class="w-[22px] h-[22px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960" fill="currentColor">
+          <path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+        </svg>
+      </button>
+    
+    </div>
+    
     <div
       class="map-controls absolute top-1/2 right-[20px] -translate-y-1/2 z-[1000] flex flex-col gap-[12px] pointer-events-auto">
 
@@ -207,7 +328,7 @@
     </button>
   </template>
 
-
+  <script src="https://api-maps.yandex.ru/2.1/?apikey=5c5535ac-06ec-43d6-a9b8-0be3fe519586&lang=ru_RU" type="text/javascript"></script>
   <script type="module" src="/src/main.ts"></script>
 </body>
 

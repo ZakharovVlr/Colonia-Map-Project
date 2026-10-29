@@ -23,3 +23,161 @@ input::-webkit-search-results-decoration {
   width: 0 !important;
   height: 0 !important;
 }
+
+/* Класс для скрытия сайдбара — просто уводим его влево за экран */
+.sidebar--collapsed {
+  transform: translateX(-100%);
+}
+
+/* Разворот иконки-стрелки внутри кнопки на 180 градусов при закрытии */
+.sidebar--collapsed .sidebar-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.tooltip-trigger {
+  @apply inline-block;
+}
+
+.tooltip-text {
+  @apply pointer-events-none absolute 
+  whitespace-nowrap px-[10px] py-[4px] 
+  rounded-[6px] border border-[#d9d9d9] 
+  bg-white font-serif text-[12px] text-[#1a1a1a] 
+  opacity-0 transition-all duration-150 
+  group-hover:opacity-100;
+}
+
+/* В конец вашего style.css / styles.css */
+
+/* 1. Главный фон сайдбара и белый текст */
+#sidebar.dark--theme {
+  background-color: #1A1A1A !important;
+  color: #f3f4f6 !important;
+}
+
+/* 2. Поле поиска — делаем более светлым серым с белым текстом */
+#sidebar.dark--theme .sidebar__search-input {
+  background-color: #868686 !important;
+  color: #ffffff !important;
+}
+
+#sidebar.dark--theme .sidebar__search-input::placeholder {
+  color: #000000 !important;
+}
+
+/* 3. Текст города и температуры в виджете погоды */
+#sidebar.dark--theme #weather-widget span {
+  color: #ffffff !important;
+}
+
+/* 4. Название бренда "Colonia" и мета-текст в футере */
+#sidebar.dark--theme .sidebar__brand-name {
+  color: #ffffff !important;
+}
+
+#sidebar.dark--theme .sidebar__brand-by,
+#sidebar.dark--theme .sidebar__meta {
+  color: #7F7F7F !important;
+}
+
+/* 5. Иконка GitHub */
+#sidebar.dark--theme .sidebar__github {
+  color: #7F7F7F !important;
+}
+
+#sidebar.dark--theme .sidebar__github:hover {
+  color: #ffffff !important;
+}
+
+/* 6. Кнопка переключения языка RU */
+#sidebar.dark--theme #lang-switch-btn {
+  background-color: #1A1A1A !important;
+  color: #ffffff !important;
+  border-color: #ababab !important;
+}
+
+#sidebar.dark--theme #lang-switch-btn:hover {
+  background-color: #444444 !important;
+}
+
+/* 7. Тонкая разделительная линия перед футером */
+#sidebar.dark--theme .sidebar__footer {
+  border-top-color: #333333 !important;
+}
+
+/* Перекрашиваем саму таблетку тулбара */
+#toolbar-actions.dark--theme {
+  background-color: #1A1A1A !important;
+  color: #ffffff !important;
+  border: 1px solid #333333;
+}
+
+/* Перекрашиваем кнопку меню и кнопку закрытия */
+#toolbar-menu-btn.dark--theme,
+#toolbar-close-btn.dark--theme {
+  background-color: #1A1A1A !important;
+  color: #ffffff !important;
+}
+
+
+/* В конец вашего style.css / styles.css */
+
+/* 1. Фон контейнера группы Zoom (+ / -) */
+.dark--theme .map-controls__group {
+  background-color: #1A1A1A !important;
+  border: 1px solid #333333 !important;
+}
+
+/* 2. Сами кнопки Плюс и Минус внутри группы */
+.dark--theme .map-controls__group .map-btn {
+  background-color: #1A1A1A !important;
+  color: #ffffff !important;
+}
+
+/* 3. Тонкая разделительная черта между Плюсом и Минусом */
+.dark--theme .map-btn--zoom-in {
+  border-bottom-color: #333333 !important;
+}
+
+/* 4. Круглая кнопка геолокации */
+.dark--theme .map-btn--location {
+  background-color: #1A1A1A !important;
+  color: #ffffff !important;
+  border: 1px solid #333333 !important;
+}
+
+/* 5. Эффект наведения (ховер) для всех кнопок управления картой в темной теме */
+.dark--theme .map-btn:hover {
+  background-color: #333333 !important;
+}
+
+/* Состояние: Шторка открыта наполовину (Medium / Default открытый) */
+.sidebar--mobile-opened {
+  transform: translateY(0) !important;
+}
+
+/* Состояние: Полностью раскрытая шторка (Full) при фокусе на поиск или свайпе вверх */
+.sidebar--mobile-full {
+  transform: translateY(0) !important;
+  height: 90vh !important;
+}
+/* В конец вашего style.css / styles.css */
+
+@media (max-width: 768px) {
+  #sidebar {
+    /* Включает плавный инерционный скролл на iOS устройствах */
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Скрываем дефолтный некрасивый скроллбар на мобилках, чтобы шторка выглядела чище */
+  #sidebar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+#sidebar {
+  /* Запрещает браузеру обрабатывать стандартные свайпы/скроллы в этой области, 
+     передавая управление нашему PointerEvent */
+  touch-action: none !important;
+}
