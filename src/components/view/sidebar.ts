@@ -39,7 +39,7 @@ export class Sidebar implements ISidebar {
     }
 
     protected renderTheme(): void {
-    // 1. Переключаем класс на сайдбаре
+    // Переключаем класс на сайдбаре
     this.sidebarElement.classList.toggle('dark--theme', this.isDark);
     }
 }
